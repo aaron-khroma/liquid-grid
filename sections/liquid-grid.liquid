@@ -1,0 +1,112 @@
+<section class="section" data-section-id="{{ section.id }}" data-section-type="liquid-grid">
+  <div class="{% if section.settings.include_margins %}container{% endif %}">
+    {%- if section.settings.title != blank -%}
+      <header class="section__header">
+        <h2 class="section__title">{{ section.settings.title | escape }}</h2>
+      </header>
+    {%- endif -%}
+
+    {%- liquid
+      assign start = 1
+      assign max = section.settings.columns | plus: 1
+      assign tab_start = 1
+      assign tab_max = section.settings.tab_columns | plus: 1 
+    -%}
+
+    <div class="liquid-grid" style="--columns: {{ section.settings.columns }}; --tab-columns: {{ section.settings.tab_columns }}">
+      {%- for block in section.blocks -%}
+
+        {% liquid
+
+          assign end = start | plus: block.settings.span
+          if end > max
+            assign end = block.settings.span | plus: 1
+            assign start = 1
+          endif
+
+          assign tab_end = tab_start | plus: block.settings.tab_span
+          if tab_end > tab_max
+            assign tab_end = block.settings.tab_span | plus: 1
+            assign tab_start = 1
+          endif
+        %}
+
+        <div style="--tab-start: {{ tab_start }}; --tab-end: {{ tab_end }}; --start: {{ start }}; --end: {{ end }};">
+          {{ block.settings.liquid }}
+        </div>
+
+        {% liquid
+
+          assign start = start | plus: block.settings.span
+          assign tab_start = tab_start | plus: block.settings.tab_span
+        %}
+
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Liquid grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Your title"
+    },
+    {
+      "type": "number",
+      "id": "columns",
+      "label": "Number of columns",
+      "default": 3
+    },
+    {
+      "type": "number",
+      "id": "tab_columns",
+      "label": "Number of columns on tablet",
+      "default": 2
+    },
+    {
+      "type": "checkbox",
+      "id": "include_margins",
+      "label": "Include margins",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "liquid",
+      "name": "Liquid block",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "liquid",
+          "label": "Liquid",
+          "default": "<p>Write or copy/paste Liquid code</p>"
+        },
+        {
+          "type": "number",
+          "id": "span",
+          "label": "Columns wide",
+          "default": 1
+        },
+        {
+          "type": "number",
+          "id": "tab_span",
+          "label": "Columns wide on tablet",
+          "default": 1
+        }
+      ]
+    }
+    
+  ],
+  "presets": [
+    {
+      "category": "Kegco",
+      "name": "Liquid grid"
+    }
+  ]
+}
+{% endschema %}
